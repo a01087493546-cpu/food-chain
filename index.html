@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="ko">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>먹이관계 탐험대</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#2c2550;          /* 기본 글자색: 진한 보라빛 남색 */
+      --ink-soft:#5a5280;
+      --forest:#2f6b55;
+      --gold:#f6c85f;
+      --berry:#d64545;
+      --paper:#fffaf0;
+      --paper-edge:#ecdcb8;
+      --lavender:#efe9ff;
+      --title:'Jua','Gowun Dodum',sans-serif;
+    }
+    *{box-sizing:border-box}
+    html, body {margin:0; padding:0; width:100%; min-height:100%; overflow-x:hidden; color:var(--ink); font-family:'Gowun Dodum',sans-serif;}
+    body{
+      background:
+        radial-gradient(circle at 12% 18%, #ffffffaa 0 2px, transparent 3px),
+        radial-gradient(circle at 78% 10%, #ffffff99 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 90% 62%, #fff4c299 0 2px, transparent 3px),
+        radial-gradient(circle at 30% 85%, #ffffff88 0 1.5px, transparent 2.5px),
+        linear-gradient(170deg,#ece6ff 0%,#e6f4ee 55%,#fcf1de 100%);
+      background-attachment:fixed;
+    }
+    body.on-home{background:#1b1640}
+    h1,h2,h3{font-family:var(--title); font-weight:400; margin:0; letter-spacing:.3px}
+    p{margin:0}
+    button,input,textarea{font:inherit}
+    button{cursor:pointer}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    [hidden]{display:none!important}
+    .hidden{display:none!important}
+    :focus-visible{outline:3px solid #f0a92a;outline-offset:3px}
+
+    .pill{min-height:44px;border-radius:999px;padding:9px 22px;font-family:var(--title);font-size:16px;border:none;transition:transform .2s,box-shadow .2s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+    .pill:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 8px 20px #4b3a8a33}
+    .dark{background:linear-gradient(135deg,#5b4b9e,#2f6b55);color:white;box-shadow:0 4px 14px #4b3a8a33}
+    .soft{background:#efe6ff;color:var(--ink)}
+    .outline{background:#ffffffd9;color:var(--ink);border:2px solid #d6caf2}
+
+    .app-container {display:flex; flex-direction:column; min-height:100vh; width:100%; max-width:1400px; margin:0 auto; padding:10px 24px 6px;}
+    header {display:flex; align-items:center; justify-content:space-between; padding:4px 0 8px; margin-bottom:8px; border-bottom:2px dashed #d8cdf0;}
+    body.on-home header{border-bottom-color:#ffffff2a}
+    .brand{background:none; border:none; font-family:var(--title); font-size:22px; color:var(--ink); padding:0;}
+    body.on-home .brand{color:#fff6dc}
+    .chip{background:#ffffffcc; color:var(--ink); padding:5px 13px; border-radius:999px; font-size:13px; font-weight:700; border:1px solid #e3d9f7}
+    body.on-home .chip{background:#ffffff1f; color:#fff6dc; border-color:#ffffff33}
+    main {flex:1; display:flex; flex-direction:column; width:100%; min-height:0;}
+    .screen {display:flex; flex-direction:column; flex:1; width:100%; min-height:0;}
+    footer{text-align:center; padding:4px 0 0; font-size:12px; color:var(--ink-soft);}
+    body.on-home footer{color:#d9d2f5aa}
+
+    /* ===== 첫 화면: 신비로운 밤숲 ===== */
+    .hero{position:relative;isolation:isolate;overflow:hidden;border-radius:32px;color:#fff8e6;padding:48px 64px; flex:1; min-height:560px; display:flex; flex-direction:column; justify-content:center;
+      background:linear-gradient(180deg,#120f33 0%,#241f5c 30%,#3d3889 55%,#6f5fae 75%,#e9a9a0 100%);
+      box-shadow:0 20px 50px #0c0a2a66, inset 0 0 0 2px #ffffff14}
+    .hero .moon{position:absolute; top:42px; right:9%; width:92px; height:92px; border-radius:50%; z-index:-1;
+      background:radial-gradient(circle at 38% 38%,#fffbe8,#ffe9a8 60%,#f7cf74);
+      box-shadow:0 0 40px 12px #ffe7a055, 0 0 120px 40px #ffe7a022}
+    .hero .sky{position:absolute; inset:0; z-index:-1; pointer-events:none}
+    .star{position:absolute; width:3px; height:3px; border-radius:50%; background:#fff; box-shadow:0 0 6px 1px #ffffffaa; animation:twinkle 3s ease-in-out infinite}
+    .firefly{position:absolute; width:7px; height:7px; border-radius:50%; background:#fff3a3; box-shadow:0 0 10px 4px #ffe36e99, 0 0 22px 8px #ffd84a44; animation:float 9s ease-in-out infinite, blink 2.6s ease-in-out infinite}
+    @keyframes twinkle{0%,100%{opacity:.25;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
+    @keyframes blink{0%,100%{opacity:.2}50%{opacity:1}}
+    @keyframes float{0%{translate:0 0}25%{translate:22px -18px}50%{translate:-10px -34px}75%{translate:-24px -10px}100%{translate:0 0}}
+    @keyframes glow{0%,100%{filter:drop-shadow(0 0 4px #ffb3d9aa)}50%{filter:drop-shadow(0 0 12px #ffb3d9)}}
+    .hero .forest{position:absolute; left:0; right:0; bottom:0; width:100%; height:46%; z-index:-1; pointer-events:none}
+    .hero .forest .shroom{animation:glow 3.5s ease-in-out infinite}
+    .hero-content{max-width:820px; position:relative; display:flex; flex-direction:column; gap:clamp(18px,3.2vh,40px)}
+    .hero-content > *{margin:0}
+    #home-main, #role-pick{display:flex; flex-direction:column; gap:clamp(16px,2.8vh,32px)}
+    #home-main[hidden], #role-pick[hidden]{display:none}
+    .hero .eyebrow{align-self:flex-start; display:inline-block; font-size:13px; font-weight:700; letter-spacing:2px; color:#ffe9a8; background:#ffffff14; border:1px solid #ffe9a855; padding:5px 14px; border-radius:999px; margin-bottom:14px}
+    .hero h1{font-size:clamp(38px,4vw,58px); line-height:1.25; margin-bottom:0; color:#fffaf0; text-shadow:0 3px 18px #00000055}
+    .hero h1 .glow{color:#ffe08a; text-shadow:0 0 18px #ffd65a88}
+    .hero .lead{font-size:17px; line-height:1.6; color:#eee9ff; max-width:560px; margin-bottom:20px}
+    .name-box{background:#ffffff17; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); border:2px solid #ffffff38; border-radius:22px; padding:18px 22px; max-width:520px; margin:0}
+    .name-box label{display:block; font-family:var(--title); font-size:18px; margin-bottom:4px; color:#fff6dc}
+    .name-box .hint{font-size:13px; color:#e5defc; margin-bottom:8px}
+    .btn-magic{background:linear-gradient(135deg,#ffe48f,#ffc56b); color:#3a2a14; box-shadow:0 0 0 3px #ffe48f44, 0 0 24px #ffd06a77}
+    .btn-light{background:#fffaf0; color:var(--ink)}
+    .btn-ghost{background:#ffffff1f; color:#fff8e6; border:2px solid #ffffff55}
+
+    .panel{border:2px solid #e6dcf7;border-radius:24px;background:#ffffffe6;box-shadow:0 10px 30px #4b3a8a14; display:flex; flex-direction:column; flex:1;}
+    .field{width:100%;min-height:46px;border:2px solid #d9cdf2;border-radius:15px;background:white;padding:10px 14px;color:var(--ink)}
+    .field:focus{border-color:#8f7ad6; outline:none; box-shadow:0 0 0 4px #c9b9ff55}
+    textarea.field{min-height:84px;resize:vertical}
+
+    .screen-head{margin-bottom:10px}
+    .tag{font-size:12px; font-weight:700; color:#5b4b9e; background:#efe6ff; padding:3px 10px; border-radius:999px; border:1px solid #ddd0fa}
+    .screen-head h2{font-size:23px; margin-top:4px; margin-bottom:2px; color:var(--ink)}
+    .screen-head p{color:var(--ink-soft); font-size:14px}
+    .panel h3{font-size:16px; color:var(--ink)}
+
+    /* ===== 생물 카드 (동화책 카드) ===== */
+    .organism-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px; padding:2px;}
+    .organism-option{--tint:#fff6e0; border:2px solid #eadbb8; background:linear-gradient(180deg,#fffdf7,var(--tint)); border-radius:18px; text-align:center; transition:transform .2s,box-shadow .2s,border-color .2s; display:flex; flex-direction:column; align-items:center; padding:5px 4px 4px; position:relative; color:var(--ink); box-shadow:0 3px 10px #8a6a3a14, inset 0 0 0 2px #ffffff99}
+    .organism-option:nth-child(5n+1){--tint:#e5f6e8}
+    .organism-option:nth-child(5n+2){--tint:#fff1cf}
+    .organism-option:nth-child(5n+3){--tint:#f0e8ff}
+    .organism-option:nth-child(5n+4){--tint:#ffe7e3}
+    .organism-option:nth-child(5n+5){--tint:#e3f2ff}
+    .organism-option:hover{transform:translateY(-4px); border-color:#f2c867; box-shadow:0 0 0 3px #ffe9a866, 0 10px 18px #8a6a3a22}
+    .organism-option.is-used{border-color:#6bb38a; box-shadow:0 0 0 3px #bfe6cc, 0 0 16px #8fd6a866}
+    .organism-option.is-used::after{content:'✓'; position:absolute; top:4px; right:6px; width:18px; height:18px; border-radius:50%; background:#2f6b55; color:white; font-size:11px; font-weight:700; line-height:18px}
+    .organism-option .emoji{font-size:28px; line-height:1.15; margin:1px 0;}
+    .organism-option .name{font-family:var(--title); font-size:15px;}
+
+    .chain{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap; width:100%; padding:8px 0;}
+    .chain-unit{display:flex;align-items:center;gap:12px; position:relative;}
+    .chain-card{width:132px;border:2px solid var(--paper-edge);border-radius:22px;overflow:hidden;text-align:center; position:relative;
+      background:linear-gradient(180deg,#fffdf6,#fbefd6); color:var(--ink);
+      box-shadow:0 0 0 4px #fff3cc88, 0 0 18px #ffe39a55, 0 8px 18px #8a6a3a1f; transition:transform .2s, box-shadow .2s, opacity .2s, filter .2s}
+    .chain-card:hover{transform:translateY(-4px); box-shadow:0 0 0 4px #ffe39aaa, 0 0 26px #ffd96a77, 0 12px 22px #8a6a3a2a}
+    .chain-card .card-inner {padding:8px 6px 5px; display:flex; flex-direction:column; align-items:center; position:relative;}
+    .chain-card .delete-btn {position:absolute; top:6px; right:6px; background:#fff0ee; color:#b03a3a; border:1px solid #f3bdb6; border-radius:50%; width:24px; height:24px; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; cursor:pointer;}
+    .chain-card .delete-btn:hover {background:#b03a3a; color:white;}
+    .chain-card .emoji{font-size:36px; margin:2px 0 0;}
+    .chain-card .caption{display:block;padding:2px 4px;font-family:var(--title);font-size:17px}
+    .chain-card.missing{opacity:.5;filter:grayscale(1);border-style:dashed;border-color:var(--berry)}
+
+    /* 활동 2: 사라지게 할 카드 선택 */
+    .remove-selectable { cursor:pointer; }
+    .remove-selectable:hover { border-color:#f2c867; }
+    .chain-card.is-selected-target { border:3px solid var(--berry); border-style:solid; opacity:.6; filter:grayscale(.35) blur(.3px); box-shadow:0 0 0 5px #f8c6c1, 0 0 22px #e0525266; }
+    .chain-card.is-selected-target::after { content:'사라져요'; position:absolute; top:6px; left:50%; transform:translateX(-50%); background:var(--berry); color:white; font-family:var(--title); font-size:12px; padding:1px 9px; border-radius:999px; }
+
+    .card-controls {display:flex; justify-content:center; gap:6px; padding:5px 0 7px; background:#f6ecd6; border-top:1px dashed var(--paper-edge);}
+    .card-controls button {background:white; border:1px solid #e3d2ac; border-radius:8px; padding:1px 9px; font-weight:700; font-size:13px; color:var(--ink);}
+    .card-controls button:hover:not(:disabled) {background:#fff3cc;}
+
+    .arrow{font-size:30px;font-weight:800;color:#8a6fd1; text-shadow:0 0 10px #c9b8ff}
+    .arrow.broken{color:#b04040;text-decoration:line-through;text-shadow:none}
+    .mini-chain{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;padding-bottom:6px}
+    .mini-chain .chain-unit{flex:0 0 auto; gap:8px}
+    .mini-chain .chain-card{width:92px;border-radius:14px; box-shadow:0 0 0 3px #fff3cc88, 0 4px 10px #8a6a3a1a}
+    .mini-chain .chain-card .emoji {font-size:28px;}
+    .mini-chain .chain-card .caption {font-size:14px;}
+    .mini-chain .arrow{font-size:20px}
+
+    #remove-chain .chain-card{width:165px}
+    #remove-chain .chain-card .emoji{font-size:54px; margin-top:12px}
+    #remove-chain .chain-card .caption{font-size:20px; padding-bottom:8px}
+    .steps{display:flex; gap:8px; margin-bottom:10px}
+    .step{background:#ffffffb3;color:var(--ink-soft);border:1px solid #e3d9f7;border-radius:999px;padding:4px 13px;font-size:13px;font-weight:700}
+    .step.active{background:linear-gradient(135deg,#5b4b9e,#2f6b55);color:white;border-color:transparent;box-shadow:0 0 12px #8a6fd155}
+
+    .affected-option{border:2px solid #d9cdf2;border-radius:12px;padding:6px 13px;background:white;font-weight:700;min-height:38px; font-size:15px; color:var(--ink)}
+    .affected-option.selected{border-color:#2f6b55;background:#e3f4e8}
+
+    .letter-cloud{position:relative; width:100%; flex:1; min-height:320px; background:linear-gradient(180deg,#fbf8ff,#fffaf0); border:2px dashed #d3c6ee; border-radius:20px; overflow:hidden;}
+    .cloud-word{position:absolute; font-family:var(--title); padding:5px 14px; border-radius:999px; background:white; border:2px solid #d9cdf2; color:var(--ink); box-shadow:0 4px 12px #4b3a8a14; transform:translate(-50%, -50%); transition:all 0.3s ease; white-space:nowrap;}
+
+
+    /* 활동 3: 화면 높이를 꽉 채우는 예측 화면 */
+    .predict-grid{display:grid; grid-template-columns:1fr 1.25fr; gap:14px; flex:1; min-height:0; margin-bottom:8px}
+    .predict-panel{padding:20px 22px; gap:16px; justify-content:space-between}
+    .q-block{display:flex; flex-direction:column; gap:8px}
+    .q-block.grow{flex:1; min-height:0}
+    .q-title{display:block; font-family:var(--title); font-size:20px; color:var(--ink); margin:0}
+    .predict-chain{justify-content:flex-start; flex-wrap:nowrap; padding:4px 0}
+    .predict-chain .chain-unit{gap:8px}
+    .predict-chain .chain-card{width:118px}
+    .predict-chain .chain-card .emoji{font-size:40px}
+    .predict-chain .arrow{font-size:26px}
+    .removed-badge{align-self:flex-start; font-family:var(--title); font-size:22px; color:#b03a3a; background:#fff0ee; border:2px solid #f3bdb6; border-radius:14px; padding:6px 18px}
+    .affected-wrap{display:flex; flex-wrap:wrap; gap:10px}
+    .affected-wrap .affected-option{font-family:var(--title); font-size:19px; min-height:52px; padding:8px 22px; border-radius:16px}
+    .affected-wrap .affected-option.selected::before{content:'✓ '}
+    .tip-box{background:linear-gradient(135deg,#fff8e1,#f3edff); border:2px dashed #e6d4a6; border-radius:18px; padding:14px 18px; font-size:15px; line-height:1.7}
+    .tip-box strong{font-family:var(--title); font-size:17px; font-weight:400}
+    .tip-box ul{margin:4px 0 0; padding-left:20px}
+    @media (min-height:950px){ .predict-chain .chain-card{width:140px} .predict-chain .chain-card .emoji{font-size:52px} .predict-chain .chain-card .caption{font-size:19px} .q-title{font-size:22px} .tip-box{font-size:16px} }
+    @media (max-height:820px){ .tip-box{display:none} .predict-panel{gap:12px; padding:16px 20px} }
+    textarea.field.answer{flex:1; min-height:90px; font-size:18px; line-height:1.6; padding:14px 16px; resize:none}
+    /* 발표 화면: 화면을 꽉 채우는 구성 */
+    .present-panel{padding:24px 32px; gap:18px; min-height:0}
+    .present-head{display:flex; align-items:baseline; gap:18px; flex-wrap:wrap}
+    .present-head h2{font-size:42px; color:var(--ink)}
+    .present-head p{font-size:20px; font-weight:700; color:var(--forest)}
+    .present-stage{flex:1.1; min-height:200px; display:flex; align-items:center; justify-content:center; border-radius:24px; background:linear-gradient(180deg,#f7f3ff,#fff8ea); border:2px dashed #e3d6f5}
+    .present-chain{gap:18px; flex-wrap:nowrap}
+    .present-chain .chain-unit{gap:18px}
+    .present-chain .chain-card{width:clamp(140px,13vw,220px)}
+    .present-chain .chain-card .emoji{font-size:clamp(56px,6vw,96px); margin-top:10px}
+    .present-chain .chain-card .caption{font-size:clamp(20px,2vw,30px); padding-bottom:12px}
+    .present-chain .arrow{font-size:clamp(34px,3.4vw,54px)}
+    .present-grid{flex:1; display:grid; grid-template-columns:1fr 1fr; grid-auto-rows:1fr; gap:14px; min-height:0}
+    .present-box{background:#fffdf7; border:2px solid #efe3c6; border-radius:20px; padding:16px 22px; overflow:auto}
+    .present-box h3{font-size:19px; color:var(--ink-soft); margin-bottom:8px}
+    .present-box p{font-size:clamp(20px,1.8vw,28px); font-weight:700; line-height:1.5; color:var(--ink); white-space:pre-wrap}
+    .present-box.removed{background:#fff3f1; border-color:#f3c4bd}
+    .present-box.removed p{color:#b03a3a; font-family:var(--title); font-weight:400; font-size:clamp(26px,2.4vw,36px)}
+    .present-box.hurt{background:#f2f9f3; border-color:#cfe6d4}
+    .present-box.hurt p{font-family:var(--title); font-weight:400; color:var(--forest)}
+
+    /* 친구들의 결과 카드 */
+    .result-card{padding:20px 22px; gap:12px}
+    .result-card .r-head{display:flex; justify-content:space-between; align-items:center}
+    .result-card .r-head h3{font-size:24px}
+    .result-card .r-done{font-size:13px; font-weight:700; background:#e3f4e8; color:var(--forest); padding:3px 10px; border-radius:999px}
+    .result-card .r-chain{display:flex; align-items:center; justify-content:center; gap:6px; flex-wrap:nowrap; background:linear-gradient(180deg,#f7f3ff,#fff8ea); padding:10px 6px; border-radius:16px}
+    .result-card .r-chain .chain-unit{gap:6px}
+    .result-card .r-chain .chain-card{width:84px; border-radius:16px; box-shadow:0 0 0 3px #fff3cc88, 0 4px 10px #8a6a3a1a}
+    .result-card .r-chain .chain-card .emoji{font-size:32px}
+    .result-card .r-chain .chain-card .caption{font-size:15px}
+    .result-card .r-chain .arrow{font-size:20px}
+    .result-card .r-tags{display:flex; flex-direction:column; gap:6px; font-size:16px; font-weight:700}
+    .result-card .r-text{border-top:1px dashed #e3d9f7; padding-top:10px}
+    .result-card .r-text .label{font-family:var(--title); font-size:15px; color:var(--ink-soft)}
+    .result-card .r-text .body{font-size:17px; line-height:1.6; white-space:pre-wrap; color:var(--ink)}
+    .result-card .pill{width:100%; margin-top:auto}
+    /* 예시 보기 */
+    .q-row{display:flex; align-items:center; justify-content:space-between; gap:10px}
+    .example-btn{flex:0 0 auto; background:#fff6dc; color:#6b4a10; border:2px solid #f2d58a; border-radius:999px; padding:5px 14px; font-family:var(--title); font-size:15px}
+    .example-btn:hover, .example-btn[aria-expanded="true"]{background:#ffe9a8}
+    .example-box{background:#fffaf0; border:2px dashed #f2d58a; border-radius:14px; padding:10px 14px; font-size:16px; line-height:1.6; color:#4a3b1a; white-space:pre-line}
+    /* 제출 완료 팝업 */
+    .friends-btn{font-size:19px; min-height:54px; padding:12px 28px}
+    #view-results-after-submit{animation:pulse 1.6s ease-in-out infinite}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 3px #ffe48f44, 0 0 18px #ffd06a66}50%{box-shadow:0 0 0 8px #ffe48f55, 0 0 34px #ffd06aaa}}
+    .modal-backdrop{position:fixed; inset:0; z-index:50; background:#1b164099; backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; padding:16px}
+    .modal{background:linear-gradient(180deg,#fffdf7,#fbf3ff); border:3px solid #f2d58a; border-radius:28px; padding:32px 40px; max-width:480px; width:100%; text-align:center; box-shadow:0 0 0 6px #fff3cc88, 0 24px 60px #1b164066}
+    .modal-icon{font-size:56px; line-height:1}
+    .modal h2{font-size:32px; margin:8px 0 6px; color:var(--ink)}
+    .modal p{font-size:18px; line-height:1.6; color:var(--ink-soft); margin-bottom:22px}
+    .modal-actions{display:flex; flex-direction:column; gap:10px}
+    .modal-actions .pill{width:100%}
+    /* 역할 선택 · 단계 버튼 · 선생님 기능 */
+    .role-title{font-family:var(--title); font-size:clamp(22px,2vw,28px); color:#fff6dc; margin:0}
+    .role-cards{display:flex; gap:22px; flex-wrap:wrap}
+    .role-card{width:clamp(220px,18vw,290px); display:flex; flex-direction:column; align-items:center; gap:8px; padding:clamp(22px,3.5vh,40px) 18px; border-radius:24px; background:#ffffff17; border:2px solid #ffffff44; color:#fff8e6; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); transition:transform .2s, box-shadow .2s, border-color .2s}
+    .role-card:hover, .role-card.active{transform:translateY(-4px); border-color:#ffe48f; box-shadow:0 0 0 3px #ffe48f44, 0 0 28px #ffd06a66}
+    .role-emoji{font-size:clamp(52px,5vw,72px); line-height:1.1}
+    .role-name{font-family:var(--title); font-size:clamp(26px,2.4vw,34px)}
+    .role-desc{font-size:16px; color:#e5defc}
+    .stage-groups{display:flex; flex-direction:column; gap:14px; align-items:flex-start}
+    .stage-group{background:#ffffff12; border:1px solid #ffffff2e; border-radius:22px; padding:12px 18px 16px}
+    .stage-label{display:inline-block; font-family:var(--title); font-size:15px; color:#ffe9a8; margin-bottom:8px; letter-spacing:.5px}
+    .stage-buttons{display:flex; gap:10px; flex-wrap:wrap}
+    .stage-buttons .pill{font-size:18px; min-height:52px; padding:12px 26px}
+    .role-switch{align-self:flex-start; margin-top:-6px; background:none; border:none; color:#d9d2f5; font-size:14px; text-decoration:underline; padding:4px 0}
+    .teacher-only{display:none!important}
+    body.is-teacher .teacher-only{display:inline-flex!important}
+    .teacher-chip{background:#ffe08a!important; color:#3a2a14!important; border-color:#f0b93a!important}
+    .danger{background:#fff0ee; color:#b03a3a; border:2px solid #f3bdb6}
+    .danger:not(:disabled):hover{background:#b03a3a; color:white}
+    .result-card{position:relative}
+    body.is-teacher .result-card .r-head h3{padding-right:40px}
+    .r-delete{position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:#fff0ee; color:#b03a3a; border:2px solid #f3bdb6; font-size:16px; font-weight:800; line-height:1; display:flex; align-items:center; justify-content:center; padding:0; transition:background .2s, color .2s, transform .2s}
+    .r-delete:hover{background:#b03a3a; color:white; transform:scale(1.08)}
+    @media (max-width:1100px){ .organism-grid{grid-template-columns:repeat(4,1fr)} }
+    @media(max-width:768px){
+      .app-container{padding:10px 16px}
+      .hero{padding:26px 22px; min-height:620px}
+      .hero h1{font-size:30px}
+      .chain{gap:8px;}
+      .chain-card{width:112px;}
+      .organism-grid{grid-template-columns:repeat(4,1fr)}
+      .predict-grid{grid-template-columns:1fr!important}
+    }
+    @media (max-height:760px){
+      .hero{min-height:0}
+      .hero h1{font-size:36px}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .star,.firefly,.hero .forest .shroom{animation:none}
+      .pill,.chain-card,.organism-option{transition:none}
+    }
+  </style>
+ </head>
+ <body class="on-home">
+  <div class="app-container">
+   <header>
+    <button id="home-link" type="button" class="brand">🌙 먹이관계 탐험대</button>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <span class="chip teacher-chip teacher-only">🧑‍🏫 선생님 모드</span>
+      <span id="sync-status" class="chip">✨ 실시간 공유 모드</span>
+      <span class="chip">초등 4학년 과학</span>
+    </div>
+   </header>
+
+   <main>
+    <!-- [화면 0] 첫 화면 -->
+    <section id="home" class="screen">
+     <div class="hero">
+      <div class="moon" aria-hidden="true"></div>
+      <div id="sky" class="sky" aria-hidden="true"></div>
+      <svg class="forest" viewBox="0 0 1440 400" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="hillBack" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a3f8f"/><stop offset="1" stop-color="#2e2866"/></linearGradient>
+          <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f2a68"/><stop offset="1" stop-color="#1f1b4a"/></linearGradient>
+          <linearGradient id="hillFront" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c1a42"/><stop offset="1" stop-color="#120f2e"/></linearGradient>
+        </defs>
+        <!-- 먼 언덕 -->
+        <path d="M0 330 C200 300 360 320 520 290 C700 255 860 210 1040 200 C1200 192 1330 220 1440 205 L1440 400 L0 400 Z" fill="url(#hillBack)" opacity=".85"/>
+        <!-- 먼 나무들 -->
+        <g fill="#2a2560" opacity=".9">
+          <polygon points="900,230 925,160 950,230"/><polygon points="940,222 970,140 1000,222"/>
+          <polygon points="1100,210 1128,130 1156,210"/><polygon points="1150,214 1172,155 1194,214"/>
+          <polygon points="1290,215 1320,128 1350,215"/><polygon points="1350,212 1372,150 1394,212"/>
+        </g>
+        <!-- 중간 언덕 -->
+        <path d="M0 360 C240 345 420 350 600 330 C780 310 900 270 1080 262 C1240 255 1350 275 1440 268 L1440 400 L0 400 Z" fill="url(#hillMid)"/>
+        <!-- 큰 나무 실루엣 -->
+        <g fill="#18163a">
+          <rect x="1018" y="230" width="10" height="50"/>
+          <polygon points="980,245 1023,150 1066,245"/><polygon points="988,205 1023,118 1058,205"/><polygon points="996,168 1023,95 1050,168"/>
+          <rect x="1218" y="210" width="12" height="60"/>
+          <polygon points="1170,232 1224,110 1278,232"/><polygon points="1180,185 1224,78 1268,185"/><polygon points="1192,140 1224,52 1256,140"/>
+          <rect x="1372" y="230" width="9" height="40"/>
+          <polygon points="1338,245 1376,160 1414,245"/><polygon points="1346,205 1376,128 1406,205"/>
+          <circle cx="820" cy="250" r="34"/><circle cx="850" cy="236" r="40"/><circle cx="884" cy="252" r="32"/><rect x="845" y="262" width="10" height="40"/>
+        </g>
+        <!-- 앞 언덕 -->
+        <path d="M0 380 C260 372 480 378 700 362 C900 348 1040 318 1200 312 C1320 308 1390 318 1440 316 L1440 400 L0 400 Z" fill="url(#hillFront)"/>
+        <!-- 빛나는 버섯 -->
+        <g class="shroom">
+          <rect x="1086" y="300" width="9" height="22" rx="4" fill="#f4e6d4"/>
+          <path d="M1070 304 Q1090 278 1111 304 Z" fill="#ff7aa8"/>
+          <circle cx="1083" cy="296" r="2.6" fill="#fff"/><circle cx="1096" cy="291" r="2.2" fill="#fff"/><circle cx="1102" cy="299" r="1.8" fill="#fff"/>
+        </g>
+        <g class="shroom" style="animation-delay:1.2s">
+          <rect x="1120" y="306" width="6" height="15" rx="3" fill="#f4e6d4"/>
+          <path d="M1110 309 Q1123 292 1136 309 Z" fill="#b48cff"/>
+          <circle cx="1119" cy="303" r="1.8" fill="#fff"/><circle cx="1127" cy="300" r="1.6" fill="#fff"/>
+        </g>
+        <g class="shroom" style="animation-delay:2s">
+          <rect x="1292" y="298" width="8" height="20" rx="4" fill="#f4e6d4"/>
+          <path d="M1278 302 Q1296 278 1314 302 Z" fill="#ffb35c"/>
+          <circle cx="1290" cy="294" r="2.3" fill="#fff"/><circle cx="1302" cy="291" r="2" fill="#fff"/>
+        </g>
+        <!-- 풀잎 -->
+        <g stroke="#2a2760" stroke-width="3" stroke-linecap="round" fill="none">
+          <path d="M760 360 q4 -16 0 -26"/><path d="M768 360 q6 -14 10 -22"/><path d="M752 360 q-6 -12 -10 -18"/>
+          <path d="M1400 318 q4 -16 0 -26"/><path d="M1408 318 q6 -14 10 -22"/>
+        </g>
+      </svg>
+
+      <div class="hero-content">
+       <span class="eyebrow">✦ 생태계 변화 예측 발표기 ✦</span>
+       <h1>생물 하나가 사라지면<br><span class="glow">숲속 친구들</span>은 어떻게 될까요?</h1>
+
+       <!-- 역할 선택 -->
+       <div id="role-pick">
+        <p class="role-title">누구로 들어갈까요?</p>
+        <div class="role-cards">
+         <button id="role-student" type="button" class="role-card"><span class="role-emoji">🧒</span><span class="role-name">학생</span><span class="role-desc">활동하고 결과 올리기</span></button>
+         <button id="role-teacher" type="button" class="role-card"><span class="role-emoji">🧑‍🏫</span><span class="role-name">선생님</span><span class="role-desc">결과 관리하기</span></button>
+        </div>
+       </div>
+
+       <div id="home-main" hidden>
+       <div class="name-box">
+        <label for="nickname">🌟 나의 이름 적기</label>
+        <p class="hint">활동을 시작하기 전에 이름을 입력해 주세요.</p>
+        <input id="nickname" class="field" maxlength="30" placeholder="예: 4학년 2반 김민준">
+        <p id="nickname-help-status" style="font-weight:700; color:#ffe08a; margin-top:6px; font-size:14px; min-height:0;" role="status"></p>
+       </div>
+
+       <div class="stage-groups">
+        <div class="stage-group">
+         <span class="stage-label">1단계 · 먹이관계 예측 활동</span>
+         <div class="stage-buttons">
+          <button id="start-button" type="button" class="pill btn-magic">🚀 활동 시작하기</button>
+          <button id="home-results" type="button" class="pill btn-ghost">👥 친구들의 결과 보기</button>
+         </div>
+        </div>
+        <div class="stage-group">
+         <span class="stage-label">2단계 · 이름 짓기</span>
+         <div class="stage-buttons">
+          <button id="home-name-btn" type="button" class="pill btn-light">✏️ 먹이관계 이름 지어보기</button>
+         </div>
+        </div>
+       </div>
+       <button id="role-switch" type="button" class="role-switch">↩ 학생/선생님 다시 고르기</button>
+       </div>
+      </div>
+     </div>
+    </section>
+
+    <!-- [화면 N] 먹이관계 이름 지어보기 (멘티미터 스타일) -->
+    <section id="naming" class="screen" hidden>
+     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+       <button id="name-back" class="pill outline" type="button">🏠 처음으로</button>
+       <div style="display:flex; gap:10px; align-items:center;">
+        <button id="names-reset" class="pill danger teacher-only" type="button">🔄 이름 모음 초기화</button>
+        <span class="tag">멘티미터 활동</span>
+       </div>
+     </div>
+     <div class="panel" style="padding:20px 28px; min-height:0;">
+      <h2 style="font-size:25px; margin-bottom:4px;">먹이관계 이름 지어보기</h2>
+      <p style="color:var(--ink-soft); font-size:15px; margin-bottom:14px;">우리 모둠 또는 내가 생각하는 먹이관계의 이름을 한 단어 또는 짧은 문장으로 적어보세요!</p>
+
+      <form id="naming-form" style="display:flex; gap:10px; margin-bottom:8px;">
+       <input id="chain-name" class="field" maxlength="40" placeholder="예: 평화로운 숲속, 논밭의 먹이관계 등" required>
+       <button id="save-name" class="pill dark" type="submit" style="white-space:nowrap;">제출하기</button>
+      </form>
+      <p id="name-message" style="font-weight:700; min-height:20px; margin-bottom:6px; font-size:14px;" role="status" aria-live="polite"></p>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <h3>우리반 공통 먹이관계 이름 모음 (많이 적을수록 크게 중앙에 모여요!)</h3>
+        <span id="name-count" style="font-weight:700; color:var(--forest); font-size:14px;" aria-live="polite">0개 이름 제출됨</span>
+      </div>
+
+      <div id="name-cloud" class="letter-cloud" aria-live="polite">
+        <div id="name-cloud-empty" style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--ink-soft); font-weight:700;">아직 제출된 먹이관계 이름이 없어요. 첫 번째로 이름을 적어보세요!</div>
+      </div>
+
+     </div>
+    </section>
+
+    <!-- 상단 단계 표시 바 (build/remove/predict에서만 보임) -->
+    <div id="steps" class="steps hidden" aria-label="활동 진행 단계">
+      <span class="step" data-step="build">01 · 먹이관계 만들기</span>
+      <span class="step" data-step="remove">02 · 생물 사라지게 하기</span>
+      <span class="step" data-step="predict">03 · 생태계 변화 예측</span>
+    </div>
+
+    <!-- [화면 1] 먹이관계 만들기 -->
+    <section id="build" class="screen" hidden>
+     <div class="screen-head">
+      <span class="tag">활동 1</span>
+      <h2>나만의 먹이관계 만들기 (최대 4개)</h2>
+      <p>생물들이 무엇을 먹고 살아가는지 생각하며 카드를 눌러 연결하고, 화살표와 삭제 버튼으로 수정하세요.</p>
+     </div>
+
+     <div class="panel" style="padding:12px 14px; margin-bottom:10px; flex:0 0 auto;">
+      <h3 style="margin-bottom:8px;">선택 가능한 생물 카드 (클릭하여 추가)</h3>
+      <div id="organism-gallery" class="organism-grid">
+       <button type="button" data-organism="풀" class="organism-option"><span class="emoji">🌿</span><span class="name">풀</span></button>
+       <button type="button" data-organism="벼" class="organism-option"><span class="emoji">🌾</span><span class="name">벼</span></button>
+       <button type="button" data-organism="메뚜기" class="organism-option"><span class="emoji">🦗</span><span class="name">메뚜기</span></button>
+       <button type="button" data-organism="나비" class="organism-option"><span class="emoji">🦋</span><span class="name">나비</span></button>
+       <button type="button" data-organism="애벌레" class="organism-option"><span class="emoji">🐛</span><span class="name">애벌레</span></button>
+       <button type="button" data-organism="개구리" class="organism-option"><span class="emoji">🐸</span><span class="name">개구리</span></button>
+       <button type="button" data-organism="참새" class="organism-option"><span class="emoji">🐦</span><span class="name">참새</span></button>
+       <button type="button" data-organism="다람쥐" class="organism-option"><span class="emoji">🐿️</span><span class="name">다람쥐</span></button>
+       <button type="button" data-organism="뱀" class="organism-option"><span class="emoji">🐍</span><span class="name">뱀</span></button>
+       <button type="button" data-organism="매" class="organism-option"><span class="emoji">🦅</span><span class="name">매</span></button>
+       <button type="button" data-organism="부엉이" class="organism-option"><span class="emoji">🦉</span><span class="name">부엉이</span></button>
+       <button type="button" data-organism="지렁이" class="organism-option"><span class="emoji">🪱</span><span class="name">지렁이</span></button>
+       <button type="button" data-organism="달팽이" class="organism-option"><span class="emoji">🐌</span><span class="name">달팽이</span></button>
+       <button type="button" data-organism="쥐" class="organism-option"><span class="emoji">🐁</span><span class="name">쥐</span></button>
+       <button type="button" data-organism="물고기" class="organism-option"><span class="emoji">🐟</span><span class="name">물고기</span></button>
+       <button type="button" data-organism="왜가리" class="organism-option"><span class="emoji">🦩</span><span class="name">왜가리</span></button>
+      </div>
+     </div>
+
+     <div class="panel" style="padding:12px 14px; margin-bottom:10px; flex:1; display:flex; flex-direction:column;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+       <h3>나의 먹이관계 작업대 (화살표: 먹이 ➔ 먹는 생물)</h3>
+       <span id="chain-count" style="font-family:var(--title); font-size:17px; color:var(--forest);" aria-live="polite">0 / 4</span>
+      </div>
+      <div id="build-chain" class="chain" style="flex:1; border:2px dashed #d3c6ee; border-radius:18px; padding:10px; min-height:110px; background:linear-gradient(180deg,#fdfbff,#fffaf0);" aria-live="polite"></div>
+      <p id="build-message" style="margin-top:4px; text-align:center; color:#b03a3a; font-weight:700; min-height:20px;" role="status"></p>
+     </div>
+
+     <div style="display:flex; gap:10px;">
+      <button id="build-back" class="pill outline" type="button">처음으로</button>
+      <button id="reset-chain" class="pill soft" type="button">전체 지우기</button>
+      <button id="build-next" class="pill dark" style="margin-left:auto;" type="button">생물 사라지게 하기 (다음) ➔</button>
+     </div>
+    </section>
+
+    <!-- [화면 2] 생물 사라지게 하기 -->
+    <section id="remove" class="screen" hidden>
+     <div class="screen-head">
+      <span class="tag">활동 2</span>
+      <h2>만약 생물 하나가 사라진다면?</h2>
+      <p>내가 만든 먹이관계에서 사라지게 할 생물 카드를 클릭해 보세요.</p>
+     </div>
+
+     <div class="panel" style="padding:24px; flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; margin-bottom:10px;">
+      <div id="remove-chain" class="chain" style="width:100%;"></div>
+      <p id="remove-message" style="margin-top:16px; text-align:center; color:#b03a3a; font-weight:700; min-height:24px;" role="status"></p>
+     </div>
+
+     <div style="display:flex; gap:10px;">
+      <button id="remove-back" class="pill outline" type="button">이전 단계</button>
+      <button id="choose-again" class="pill soft" type="button">다시 선택하기</button>
+      <button id="remove-next" class="pill dark" style="margin-left:auto;" type="button">생태계 변화 예측하기 (다음) ➔</button>
+     </div>
+    </section>
+
+    <!-- [화면 3] 생태계 변화 예측 -->
+    <section id="predict" class="screen" hidden>
+     <div class="screen-head">
+      <span class="tag">활동 3</span>
+      <h2>생태계 변화를 예측해요</h2>
+     </div>
+
+     <form id="prediction-form" style="display:flex; flex-direction:column; flex:1;" novalidate>
+      <div class="predict-grid">
+        <div class="panel predict-panel">
+         <div class="q-block">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:10px;">
+           <h3 class="q-title">나의 먹이관계 구조</h3>
+           <p id="nickname-preview" style="font-weight:700; color:var(--forest); font-size:14px;"></p>
+          </div>
+          <div id="predict-chain" class="chain predict-chain"></div>
+         </div>
+
+         <div class="q-block">
+          <div class="q-title">1. 어떤 생물이 사라졌나요?</div>
+          <p id="predict-removed" class="removed-badge"></p>
+         </div>
+
+         <div class="q-block">
+          <div class="q-title">2. 가장 피해를 받을 생물 (복수 선택)</div>
+          <div id="affected-options" class="affected-wrap" role="group" aria-label="가장 피해를 받을 생물 선택"></div>
+         </div>
+
+         <div class="tip-box">
+          <strong>💡 생각 도우미</strong>
+          <ul>
+           <li>사라진 생물을 <b>먹던</b> 생물은 어떻게 될까요?</li>
+           <li>사라진 생물에게 <b>먹히던</b> 생물은 어떻게 될까요?</li>
+           <li>화살표가 끊어진 곳을 따라가 보세요.</li>
+          </ul>
+         </div>
+        </div>
+
+        <div class="panel predict-panel">
+         <div class="q-block grow">
+           <div class="q-row">
+            <label for="prediction" class="q-title">3. 어떤 일이 일어날 것 같나요?</label>
+            <button type="button" class="example-btn" data-example="prediction-example" aria-expanded="false">💡 예시 보기</button>
+           </div>
+           <p id="prediction-example" class="example-box" hidden></p>
+           <textarea id="prediction" class="field answer" maxlength="1000" placeholder="여기에 내 생각을 적어 보세요." required></textarea>
+         </div>
+         <div class="q-block grow">
+           <div class="q-row">
+            <label for="reason" class="q-title">4. 그렇게 생각한 까닭은 무엇인가요?</label>
+            <button type="button" class="example-btn" data-example="reason-example" aria-expanded="false">💡 예시 보기</button>
+           </div>
+           <p id="reason-example" class="example-box" hidden></p>
+           <textarea id="reason" class="field answer" maxlength="1000" placeholder="여기에 까닭을 적어 보세요." required></textarea>
+         </div>
+        </div>
+      </div>
+
+      <p id="submit-message" style="margin-bottom:6px; font-weight:700; color:#b03a3a; min-height:20px;" role="status" aria-live="polite"></p>
+
+      <div style="display:flex; gap:10px;">
+       <button id="predict-back" class="pill outline" type="button">이전 단계</button>
+       <button id="view-results-after-submit" type="button" class="pill btn-magic friends-btn" hidden>👥 친구들 결과 보러 가기 ➔</button>
+       <button id="submit-result" type="button" class="pill dark" style="margin-left:auto;">결과 제출하기</button>
+      </div>
+     </form>
+    </section>
+
+    <!-- 제출 완료 팝업 -->
+    <div id="submit-modal" class="modal-backdrop" hidden>
+     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="submit-modal-title">
+      <div class="modal-icon" aria-hidden="true">🎉</div>
+      <h2 id="submit-modal-title">제출 완료!</h2>
+      <p>친구들은 어떤 생각을 썼을까요?<br>친구들이 쓴 글을 보러 갈까요?</p>
+      <div class="modal-actions">
+       <button id="modal-go-results" type="button" class="pill btn-magic friends-btn">👥 친구들 글 보러 가기</button>
+       <button id="modal-stay" type="button" class="pill outline">조금 더 있을게요</button>
+      </div>
+     </div>
+    </div>
+
+    <!-- [화면 4] 친구들의 결과 함께 보기 -->
+    <section id="results" class="screen" hidden>
+     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div class="screen-head" style="margin:0;">
+       <span class="tag">활동 4</span>
+       <h2>친구들의 예측 결과 함께 보기</h2>
+      </div>
+      <div style="display:flex; gap:10px;">
+       <button id="results-clear" class="pill danger teacher-only" type="button">🧹 결과 전체 지우기</button>
+       <button id="results-home" class="pill outline" type="button">🏠 처음으로 돌아가기</button>
+      </div>
+     </div>
+
+     <p id="results-count" style="font-weight:700; color:var(--forest); margin-bottom:10px;" aria-live="polite">0개의 제출 결과</p>
+     <p id="results-empty" class="panel" style="padding:32px; text-align:center; color:var(--ink-soft); font-weight:700;" hidden>아직 제출된 친구들의 결과가 없어요. 첫 번째로 결과를 제출해 보세요!</p>
+
+     <div id="results-list" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); align-content:start; gap:16px; overflow-y:auto; flex:1; padding-bottom:10px;"></div>
+    </section>
+
+    <!-- [화면 5] 전체 화면 발표 모드 -->
+    <section id="presentation" class="screen" hidden>
+     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <button id="presentation-back" class="pill outline" type="button">⬅ 전체 결과로 돌아가기</button>
+      <span class="tag" style="font-size:14px; padding:5px 14px;">발표 화면 모드</span>
+     </div>
+
+     <article class="panel present-panel">
+      <div class="present-head">
+       <h2 id="presentation-name"></h2>
+       <p id="presentation-chain-name"></p>
+      </div>
+
+      <div class="present-stage">
+       <div id="presentation-chain" class="chain present-chain"></div>
+      </div>
+
+      <div class="present-grid">
+       <div class="present-box removed">
+        <h3>❌ 사라진 생물</h3>
+        <p id="presentation-removed"></p>
+       </div>
+       <div class="present-box hurt">
+        <h3>⚡ 가장 피해를 받을 생물</h3>
+        <p id="presentation-affected" class="result-copy"></p>
+       </div>
+       <div class="present-box">
+        <h3>🔮 앞으로 생길 것 같은 일</h3>
+        <p id="presentation-prediction" class="result-copy"></p>
+       </div>
+       <div class="present-box">
+        <h3>💭 그렇게 생각한 까닭</h3>
+        <p id="presentation-reason" class="result-copy"></p>
+       </div>
+      </div>
+     </article>
+    </section>
+   </main>
+
+   <footer>
+    먹이 관계를 직접 조사하고 자신의 생각을 글로 표현해 보세요.
+   </footer>
+  </div>
+
+  <script>
+    // 첫 화면 밤하늘: 반짝이는 별과 반딧불 만들기
+    (function makeSky() {
+      const sky = document.getElementById('sky');
+      if (!sky) return;
+      const rand = (a, b) => a + Math.random() * (b - a);
+      for (let i = 0; i < 46; i++) {
+        const s = document.createElement('span');
+        s.className = 'star';
+        s.style.left = rand(0, 100) + '%';
+        s.style.top = rand(0, 55) + '%';
+        const size = rand(1.5, 3.5);
+        s.style.width = s.style.height = size + 'px';
+        s.style.animationDelay = rand(0, 3) + 's';
+        s.style.animationDuration = rand(2, 4.5) + 's';
+        sky.append(s);
+      }
+      for (let i = 0; i < 16; i++) {
+        const f = document.createElement('span');
+        f.className = 'firefly';
+        f.style.left = rand(40, 98) + '%';
+        f.style.top = rand(45, 92) + '%';
+        f.style.animationDelay = rand(0, 8) + 's, ' + rand(0, 2.6) + 's';
+        f.style.animationDuration = rand(7, 13) + 's, ' + rand(1.8, 3.4) + 's';
+        sky.append(f);
+      }
+    })();
+  </script>
+
+  <script>
+    // ===== 친구들과 결과 공유 설정 =====
+    // 구글 Apps Script 웹 앱 주소(https://script.google.com/macros/s/.../exec)를 따옴표 안에 붙여넣으세요.
+    // 비워 두면 이 기기(브라우저)에만 저장됩니다. 설정 방법: 같은 폴더의 '공유설정_안내.md'
+    const SYNC_URL = '';
+    const SYNC_INTERVAL_MS = 5000;
+
+    const $ = id => document.getElementById(id);
+    const emojis = {
+      "풀":"🌿","벼":"🌾","메뚜기":"🦗","나비":"🦋","애벌레":"🐛",
+      "개구리":"🐸","참새":"🐦","다람쥐":"🐿️","뱀":"🐍","매":"🦅",
+      "부엉이":"🦉","지렁이":"🪱","달팽이":"🐌","쥐":"🐁","물고기":"🐟","왜가리":"🦩"
+    };
+    
+    const gallery = [...document.querySelectorAll('#organism-gallery [data-organism]')];
+    const source = new Map(gallery.map(card => [card.dataset.organism, card]));
+    
+    const state = {
+      chain: [], removed: null, affected: new Set(), records: [], nameRecords: [],
+      hasSubmittedResult: false
+    };
+
+    function show(screen) {
+      document.querySelectorAll('.screen').forEach(el => { el.hidden = el.id !== screen; });
+      $('steps').classList.toggle('hidden', !['build', 'remove', 'predict'].includes(screen));
+      document.body.classList.toggle('on-home', screen === 'home');
+      document.querySelectorAll('.step').forEach(el => el.classList.toggle('active', el.dataset.step === screen));
+      window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function requireNickname() {
+      const val = $('nickname').value.trim();
+      if (val) return true;
+      $('nickname-help-status').textContent = '먼저 나의 이름을 적어 주세요!';
+      show('home');
+      $('nickname').focus();
+      return false;
+    }
+
+    // opts: { missing, editable, selectable, index, total }
+    function cardFor(name, opts) {
+      const { missing, editable, selectable, index, total } = opts;
+      const card = document.createElement('div');
+      card.className = 'chain-card' + (missing ? ' missing' : '');
+      
+      const inner = document.createElement('div');
+      inner.className = 'card-inner';
+      
+      if (editable) {
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'delete-btn';
+        delBtn.textContent = '✕';
+        delBtn.title = '삭제';
+        delBtn.onclick = (e) => {
+          e.stopPropagation();
+          state.chain.splice(index, 1);
+          if (state.removed === name) state.removed = null;
+          state.affected.delete(name);
+          renderBuild();
+        };
+        inner.append(delBtn);
+      }
+      
+      const emoji = document.createElement('div');
+      emoji.className = 'emoji';
+      emoji.textContent = emojis[name] || '🐾';
+      
+      const label = document.createElement('span');
+      label.className = 'caption';
+      label.textContent = name;
+      
+      inner.append(emoji, label);
+      card.append(inner);
+
+      if (editable) {
+        const controls = document.createElement('div');
+        controls.className = 'card-controls';
+        
+        const leftBtn = document.createElement('button');
+        leftBtn.type = 'button';
+        leftBtn.textContent = '◀';
+        leftBtn.disabled = index === 0;
+        leftBtn.onclick = () => {
+          [state.chain[index - 1], state.chain[index]] = [state.chain[index], state.chain[index - 1]];
+          renderBuild();
+        };
+        
+        const rightBtn = document.createElement('button');
+        rightBtn.type = 'button';
+        rightBtn.textContent = '▶';
+        rightBtn.disabled = index === total - 1;
+        rightBtn.onclick = () => {
+          [state.chain[index + 1], state.chain[index]] = [state.chain[index], state.chain[index + 1]];
+          renderBuild();
+        };
+        
+        controls.append(leftBtn, rightBtn);
+        card.append(controls);
+      }
+
+      // 활동 2: 사라지게 할 생물 카드 선택 (화면 상태와 상관없이 옵션으로 결정)
+      if (selectable) {
+        const picked = state.removed === name;
+        card.classList.add('remove-selectable');
+        card.classList.toggle('is-selected-target', picked);
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-pressed', String(picked));
+        const pick = () => {
+          state.removed = name;
+          state.affected.delete(name);
+          renderRemove();
+        };
+        card.onclick = pick;
+        card.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+        };
+      }
+
+      return card;
+    }
+
+    // opts: { editable, selectable }
+    function renderChain(target, names, removed, opts = {}) {
+      target.replaceChildren();
+      names.forEach((name, i) => {
+        const unit = document.createElement('div');
+        unit.className = 'chain-unit';
+        if (i) {
+          const arrow = document.createElement('span');
+          arrow.className = 'arrow' + (names[i - 1] === removed || name === removed ? ' broken' : '');
+          arrow.textContent = '➔';
+          unit.append(arrow);
+        }
+        unit.append(cardFor(name, {
+          missing: name === removed,
+          editable: !!opts.editable,
+          selectable: !!opts.selectable,
+          index: i,
+          total: names.length
+        }));
+        target.append(unit);
+      });
+    }
+
+    function renderBuild() {
+      $('chain-count').textContent = state.chain.length + ' / 4';
+      gallery.forEach(card => {
+        const used = state.chain.includes(card.dataset.organism);
+        card.classList.toggle('is-used', used);
+      });
+      renderChain($('build-chain'), state.chain, null, { editable: true });
+    }
+
+    function renderRemove() {
+      renderChain($('remove-chain'), state.chain, state.removed, { selectable: true });
+      $('remove-message').textContent = state.removed
+        ? '선택된 사라진 생물: "' + state.removed + '" (다른 카드를 누르면 바꿀 수 있어요)'
+        : '';
+    }
+
+    // 받침에 따라 조사 고르기 (예: 을/를, 은/는, 이/가, 과/와)
+    function josa(word, withBatchim, without) {
+      const code = word.charCodeAt(word.length - 1) - 0xAC00;
+      const has = code >= 0 && code <= 11171 && code % 28 !== 0;
+      return word + (has ? withBatchim : without);
+    }
+
+    // 내 먹이관계에 맞춘 두 줄짜리 예시 (화살표: 먹이 ➔ 먹는 생물)
+    function buildExamples() {
+      const gone = state.removed;
+      const i = state.chain.indexOf(gone);
+      const prey = state.chain[i - 1];      // 사라진 생물에게 먹히던 생물
+      const eater = state.chain[i + 1];     // 사라진 생물을 먹던 생물
+      let prediction, reason;
+      if (eater && prey) {
+        prediction = josa(gone, '이', '가') + ' 사라지면 ' + josa(eater, '은', '는') + ' 먹이가 없어서 수가 줄어들 것 같아요.\n'
+          + '그리고 ' + josa(prey, '은', '는') + ' 잡아먹히지 않아서 수가 늘어날 것 같아요.';
+        reason = josa(eater, '은', '는') + ' ' + josa(gone, '을', '를') + ' 먹고 살고, ' + josa(gone, '은', '는') + ' ' + josa(prey, '을', '를') + ' 먹고 살기 때문이에요.\n'
+          + '생물들은 먹고 먹히는 관계로 이어져 있어서 하나가 사라지면 다른 생물도 영향을 받아요.';
+      } else if (eater) {
+        prediction = josa(gone, '이', '가') + ' 사라지면 ' + josa(eater, '은', '는') + ' 먹을 것이 부족해질 것 같아요.\n'
+          + '그래서 ' + josa(eater, '이', '가') + ' 점점 줄어들고, 그 위의 생물도 살기 어려워질 것 같아요.';
+        reason = josa(eater, '은', '는') + ' ' + josa(gone, '을', '를') + ' 먹이로 삼아 살아가기 때문이에요.\n'
+          + '먹이가 줄면 그것을 먹는 생물도 함께 줄어들어요.';
+      } else {
+        prediction = josa(gone, '이', '가') + ' 사라지면 ' + josa(prey || '먹이 생물', '이', '가') + ' 잡아먹히지 않아서 많이 늘어날 것 같아요.\n'
+          + '그러면 ' + josa(prey || '먹이 생물', '이', '가') + ' 먹는 생물도 줄어들 것 같아요.';
+        reason = josa(gone, '은', '는') + ' ' + josa(prey || '먹이 생물', '을', '를') + ' 잡아먹어서 수를 알맞게 지켜 주던 생물이기 때문이에요.\n'
+          + '잡아먹는 생물이 없으면 한 생물만 너무 많아질 수 있어요.';
+      }
+      $('prediction-example').textContent = '예) ' + prediction;
+      $('reason-example').textContent = '예) ' + reason;
+    }
+
+    function renderPredict() {
+      buildExamples();
+      $('nickname-preview').textContent = '활동 이름 · ' + $('nickname').value.trim();
+      renderChain($('predict-chain'), state.chain, state.removed);
+      $('predict-removed').textContent = state.removed || '—';
+      const options = $('affected-options');
+      options.replaceChildren();
+      state.chain.filter(name => name !== state.removed).forEach(name => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'affected-option' + (state.affected.has(name) ? ' selected' : '');
+        btn.textContent = name;
+        btn.onclick = () => {
+          if (state.affected.has(name)) state.affected.delete(name);
+          else state.affected.add(name);
+          btn.classList.toggle('selected', state.affected.has(name));
+        };
+        options.append(btn);
+      });
+    }
+
+    // 한 사람당 먹이관계 이름은 하나만: 같은 이름(닉네임)으로 이미 제출했는지 확인
+    function hasNamed() {
+      const me = $('nickname').value.trim();
+      if (!me) return false;
+      return state.nameRecords.some(r => (r.nickname || '').trim() === me);
+    }
+
+    function updateNamingLock() {
+      const locked = hasNamed();
+      $('chain-name').disabled = locked;
+      $('save-name').disabled = locked;
+      if (locked) {
+        $('name-message').style.color = '#2f6b55';
+        $('name-message').textContent = '✅ 이미 이름을 지었어요! 한 사람당 하나만 지을 수 있어요.';
+      } else {
+        $('name-message').textContent = '';
+      }
+    }
+
+    function renderNameCloud() {
+      const cloud = $('name-cloud');
+      const empty = $('name-cloud-empty');
+      const countEl = $('name-count');
+      
+      const counts = {};
+      state.nameRecords.forEach(r => {
+        const w = (r.chain_name || '').trim();
+        if (w) counts[w] = (counts[w] || 0) + 1;
+      });
+      
+      const uniqueWords = Object.keys(counts);
+      countEl.textContent = uniqueWords.length + '개 이름 제출됨';
+      empty.style.display = uniqueWords.length === 0 ? 'flex' : 'none';
+      
+      [...cloud.children].forEach(c => { if(c !== empty) c.remove(); });
+
+      if (uniqueWords.length === 0) return;
+
+      const placed = [];
+      const cloudWidth = cloud.clientWidth || 600;
+      const cloudHeight = cloud.clientHeight || 340;
+      const centerX = cloudWidth / 2;
+      const centerY = cloudHeight / 2;
+
+      uniqueWords.sort((a,b) => counts[b] - counts[a]);
+
+      uniqueWords.forEach((word, idx) => {
+        const freq = counts[word];
+        const el = document.createElement('div');
+        el.className = 'cloud-word';
+        el.textContent = word;
+        
+        const fontSize = Math.min(24 + freq * 10, 64);
+        el.style.fontSize = fontSize + 'px';
+        el.style.zIndex = freq * 10;
+        const tints = ['#fff1cf', '#e5f6e8', '#f0e8ff', '#ffe7e3', '#e3f2ff'];
+        el.style.background = freq >= 3 ? '#ffe08a' : tints[idx % tints.length];
+        el.style.borderColor = freq >= 3 ? '#f0b93a' : '#e3d6f5';
+
+        cloud.append(el);
+
+        const w = el.offsetWidth || (word.length * fontSize * 0.7);
+        const h = el.offsetHeight || (fontSize * 1.4);
+
+        let angle = idx * 1.4;
+        let radius = idx * 18;
+        let x = centerX, y = centerY;
+        let attempts = 0;
+
+        while (attempts < 120) {
+          x = centerX + radius * Math.cos(angle) - w / 2;
+          y = centerY + radius * Math.sin(angle) - h / 2;
+
+          x = Math.max(10, Math.min(cloudWidth - w - 10, x));
+          y = Math.max(10, Math.min(cloudHeight - h - 10, y));
+
+          let overlap = false;
+          for (let p of placed) {
+            if (!(x + w + 6 < p.x || x > p.x + p.w + 6 || y + h + 6 < p.y || y > p.y + p.h + 6)) {
+              overlap = true;
+              break;
+            }
+          }
+
+          if (!overlap) break;
+          angle += 0.5;
+          radius += 10;
+          attempts++;
+        }
+
+        placed.push({ x, y, w, h });
+        el.style.left = (x + w/2) + 'px';
+        el.style.top = (y + h/2) + 'px';
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    function renderResults() {
+      const list = $('results-list');
+      list.replaceChildren();
+      
+      $('results-count').textContent = state.records.length + '개의 제출 결과';
+      $('results-empty').style.display = state.records.length === 0 ? 'block' : 'none';
+
+      state.records.forEach(row => {
+        const article = document.createElement('article');
+        article.className = 'panel result-card';
+        const chainNames = [row.organism1, row.organism2, row.organism3, row.organism4].filter(Boolean);
+
+        article.innerHTML =
+          '<div class="r-head"><h3>' + escapeHtml(row.nickname) + '</h3>' +
+            (isTeacher() ? '<button type="button" class="r-delete" title="이 결과 삭제" aria-label="' + escapeHtml(row.nickname) + ' 결과 삭제">✕</button>' : '<span class="r-done">제출완료</span>') +
+          '</div>' +
+          '<div class="r-chain"></div>' +
+          '<div class="r-tags">' +
+            '<p style="color:#b03a3a;">❌ 사라진 생물: ' + escapeHtml(row.removed_organism) + '</p>' +
+            '<p style="color:var(--forest);">⚡ 가장 피해를 받을 생물: ' + escapeHtml(row.affected_organisms || '없음') + '</p>' +
+          '</div>' +
+          '<div class="r-text"><p class="label">앞으로 생길 것 같은 일</p><p class="body">' + escapeHtml(row.prediction) + '</p></div>' +
+          '<div class="r-text"><p class="label">그렇게 생각한 까닭</p><p class="body">' + escapeHtml(row.reason) + '</p></div>' +
+          '<button type="button" class="pill dark">🔍 발표 화면으로 크게 보기</button>';
+        renderChain(article.querySelector('.r-chain'), chainNames, row.removed_organism);
+
+        article.querySelector('.pill.dark').onclick = () => present(row);
+        const del = article.querySelector('.r-delete');
+        if (del) del.onclick = () => deleteResult(row);
+        list.append(article);
+      });
+    }
+
+    function present(row) {
+      $('presentation-name').textContent = row.nickname + ' 학생의 발표';
+      $('presentation-chain-name').textContent = row.chain_name ? '먹이관계 이름 · ' + row.chain_name : '';
+      const chainNames = [row.organism1, row.organism2, row.organism3, row.organism4].filter(Boolean);
+      renderChain($('presentation-chain'), chainNames, row.removed_organism);
+      $('presentation-removed').textContent = row.removed_organism || '—';
+      $('presentation-affected').textContent = row.affected_organisms || '—';
+      $('presentation-prediction').textContent = row.prediction || '';
+      $('presentation-reason').textContent = row.reason || '';
+      show('presentation');
+    }
+
+    function loadData() {
+      try {
+        const savedRecords = localStorage.getItem('eco_records_v4');
+        if (savedRecords) state.records = JSON.parse(savedRecords);
+        const savedNames = localStorage.getItem('eco_namings_v4');
+        if (savedNames) state.nameRecords = JSON.parse(savedNames);
+      } catch(e) { console.error(e); }
+      // 예전 기록에도 삭제용 id를 붙여 둡니다.
+      state.records.forEach(r => { if (!r.id) r.id = makeId(); });
+    }
+
+    function makeId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function saveData() {
+      try {
+        localStorage.setItem('eco_records_v4', JSON.stringify(state.records));
+        localStorage.setItem('eco_namings_v4', JSON.stringify(state.nameRecords));
+      } catch(e) { console.error(e); }
+    }
+
+    // ===== 공유 저장소(구글 시트) 연동 =====
+    let lastSnapshot = '';
+
+    function setSyncStatus(kind) {
+      const el = $('sync-status');
+      const text = {
+        local: '💾 이 기기에만 저장',
+        ok: '✨ 실시간 공유 중',
+        loading: '⏳ 연결하는 중…',
+        error: '⚠️ 공유 연결 오류'
+      }[kind];
+      el.textContent = text;
+      el.title = kind === 'local' ? 'SYNC_URL을 설정하면 친구들과 결과가 공유돼요.' : '';
+    }
+
+    function normalizeRows(rows) {
+      // 시트에서 숫자처럼 보이는 값도 글자로 다룹니다.
+      return (rows || []).map(row => {
+        const out = {};
+        Object.keys(row).forEach(k => { out[k] = row[k] == null ? '' : String(row[k]); });
+        return out;
+      });
+    }
+
+    async function pullShared() {
+      if (!SYNC_URL) return false;
+      try {
+        const res = await fetch(SYNC_URL + '?t=' + Date.now());
+        const data = await res.json();
+        const snapshot = JSON.stringify(data);
+        setSyncStatus('ok');
+        if (snapshot === lastSnapshot) return false;
+        lastSnapshot = snapshot;
+        state.records = normalizeRows(data.records);
+        state.nameRecords = normalizeRows(data.names);
+        saveData();
+        return true;
+      } catch (e) {
+        console.error(e);
+        setSyncStatus('error');
+        return false;
+      }
+    }
+
+    async function pushShared(type, record, extra = {}) {
+      if (!SYNC_URL) return true;
+      try {
+        // text/plain으로 보내야 Apps Script가 추가 확인 요청 없이 받아 줍니다.
+        await fetch(SYNC_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(Object.assign({ type, record }, extra))
+        });
+        await pullShared();
+        return true;
+      } catch (e) {
+        console.error(e);
+        setSyncStatus('error');
+        return false;
+      }
+    }
+
+    function refreshVisibleShared() {
+      const visible = document.querySelector('.screen:not([hidden])');
+      if (!visible) return;
+      if (visible.id === 'results') renderResults();
+      if (visible.id === 'naming') { renderNameCloud(); updateNamingLock(); }
+    }
+
+    // ===== 역할(학생/선생님) =====
+    function isTeacher() { return document.body.classList.contains('is-teacher'); }
+
+    function setRole(role) {
+      document.body.classList.toggle('is-teacher', role === 'teacher');
+      try { sessionStorage.setItem('eco_role', role); } catch (e) {}
+      $('role-pick').hidden = true;
+      $('home-main').hidden = false;
+      if (role === 'teacher' && !$('nickname').value.trim()) $('nickname').value = '선생님';
+      $('nickname').focus();
+    }
+
+    function resetRole() {
+      document.body.classList.remove('is-teacher');
+      try { sessionStorage.removeItem('eco_role'); } catch (e) {}
+      $('home-main').hidden = true;
+      $('role-pick').hidden = false;
+      show('home');
+    }
+
+    async function deleteResult(row) {
+      if (!isTeacher()) return;
+      if (!confirm('"' + row.nickname + '" 학생의 결과를 삭제할까요?\n삭제하면 되돌릴 수 없어요.')) return;
+      state.records = state.records.filter(r => r !== row && (!row.id || r.id !== row.id));
+      saveData();
+      renderResults();
+      await pushShared('deleteResult', { id: row.id });
+      renderResults();
+    }
+
+    async function clearResults() {
+      if (!isTeacher()) return;
+      if (!confirm('친구들의 결과를 모두 지울까요?\n새 수업을 시작할 때 사용하세요. 되돌릴 수 없어요.')) return;
+      state.records = [];
+      saveData();
+      renderResults();
+      await pushShared('resetResults', {});
+      renderResults();
+    }
+
+    async function resetNames() {
+      if (!isTeacher()) return;
+      if (!confirm('먹이관계 이름 모음을 모두 지울까요?\n학생들이 다시 이름을 지을 수 있게 돼요.')) return;
+      state.nameRecords = [];
+      saveData();
+      renderNameCloud();
+      updateNamingLock();
+      await pushShared('resetNames', {});
+      renderNameCloud();
+      updateNamingLock();
+    }
+
+    function startSharing() {
+      if (!SYNC_URL) { setSyncStatus('local'); return; }
+      setSyncStatus('loading');
+      const tick = async () => { if (await pullShared()) refreshVisibleShared(); };
+      tick();
+      setInterval(tick, SYNC_INTERVAL_MS);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      startSharing();
+      window.addEventListener('resize', () => { if (!$('naming').hidden) renderNameCloud(); });
+
+      $('home-link').onclick = () => show('home');
+
+      // 역할 선택
+      $('role-student').onclick = () => setRole('student');
+      $('role-teacher').onclick = () => setRole('teacher');
+      $('role-switch').onclick = resetRole;
+      $('results-clear').onclick = clearResults;
+      $('names-reset').onclick = resetNames;
+      try {
+        const savedRole = sessionStorage.getItem('eco_role');
+        if (savedRole === 'teacher' || savedRole === 'student') setRole(savedRole);
+      } catch (e) {}
+      $('home-results').onclick = () => { renderResults(); show('results'); pullShared().then(c => c && renderResults()); };
+      $('results-home').onclick = () => show('home');
+      $('home-name-btn').onclick = () => {
+        if (!requireNickname()) return;
+        show('naming');
+        updateNamingLock();
+        renderNameCloud();
+      };
+      $('name-back').onclick = () => show('home');
+
+      $('start-button').onclick = () => {
+        if (!requireNickname()) return;
+        renderBuild();
+        show('build');
+      };
+
+      gallery.forEach(card => card.onclick = () => {
+        const name = card.dataset.organism;
+        if (state.chain.includes(name)) {
+          $('build-message').textContent = '이미 넣은 생물이에요. 순서를 바꾸거나 삭제할 수 있어요.';
+          return;
+        }
+        if (state.chain.length >= 4) {
+          $('build-message').textContent = '먹이관계에는 생물을 최대 4개까지 넣을 수 있어요.';
+          return;
+        }
+        state.chain.push(name);
+        $('build-message').textContent = '';
+        renderBuild();
+      });
+
+      $('build-back').onclick = () => show('home');
+      $('reset-chain').onclick = () => {
+        state.chain = [];
+        state.removed = null;
+        state.affected.clear();
+        $('build-message').textContent = '';
+        renderBuild();
+      };
+      $('build-next').onclick = () => {
+        if (state.chain.length < 3) {
+          $('build-message').textContent = '생물을 최소 3개 이상 선택해 주세요.';
+          return;
+        }
+        renderRemove();
+        show('remove');
+      };
+
+      $('remove-back').onclick = () => show('build');
+      $('choose-again').onclick = () => {
+        state.removed = null;
+        renderRemove();
+      };
+      $('remove-next').onclick = () => {
+        if (!state.removed) {
+          $('remove-message').textContent = '사라질 생물을 하나 선택해 주세요.';
+          return;
+        }
+        renderPredict();
+        show('predict');
+      };
+
+      $('predict-back').onclick = () => show('remove');
+      $('presentation-back').onclick = () => { renderResults(); show('results'); };
+      $('view-results-after-submit').onclick = () => { renderResults(); show('results'); };
+
+      $('naming-form').onsubmit = async (e) => {
+        e.preventDefault();
+        if (!requireNickname()) return;
+        if (hasNamed()) { updateNamingLock(); return; }
+        const val = $('chain-name').value.trim();
+        if (!val) return;
+
+        const nameRecord = {
+          nickname: $('nickname').value.trim(),
+          chain_name: val,
+          submitted_at: new Date().toISOString()
+        };
+        state.nameRecords.push(nameRecord);
+        saveData();
+        renderNameCloud();
+        await pushShared('name', nameRecord);
+
+        $('chain-name').value = '';
+        updateNamingLock();
+        $('name-message').textContent = '🎉 제출되었어요! 이름 모음에 반영되었어요. (한 사람당 하나만 지을 수 있어요)';
+        renderNameCloud();
+      };
+
+      $('submit-result').onclick = async () => {
+        const nickname = $('nickname').value.trim();
+        const prediction = $('prediction').value.trim();
+        const reason = $('reason').value.trim();
+        
+        if (!nickname || state.chain.length < 3 || !state.removed || !prediction || !reason) {
+          $('submit-message').textContent = '모든 항목을 올바르게 작성해 주세요!';
+          return;
+        }
+
+        const newRecord = {
+          id: makeId(),
+          nickname,
+          organism1: state.chain[0] || '',
+          organism2: state.chain[1] || '',
+          organism3: state.chain[2] || '',
+          organism4: state.chain[3] || '',
+          removed_organism: state.removed,
+          affected_organisms: [...state.affected].join(', '),
+          prediction,
+          reason,
+          submitted_at: new Date().toISOString()
+        };
+
+        state.records.unshift(newRecord);
+        state.hasSubmittedResult = true;
+        saveData();
+        $('submit-result').disabled = true;
+        $('submit-message').style.color = '#28745a';
+        $('submit-message').textContent = '결과를 보내는 중이에요…';
+        if (!(await pushShared('result', newRecord))) {
+          $('submit-message').style.color = '#b03a3a';
+          $('submit-message').textContent = '공유 저장에 실패했어요. 인터넷 연결을 확인하고 다시 눌러 주세요.';
+          state.records.shift();
+          state.hasSubmittedResult = false;
+          $('submit-result').disabled = false;
+          return;
+        }
+
+        $('submit-message').style.color = '#28745a';
+        $('submit-message').textContent = '결과가 안전하게 제출되었어요!';
+        $('submit-result').disabled = true;
+        $('view-results-after-submit').hidden = false;
+        $('submit-modal').hidden = false;
+        $('modal-go-results').focus();
+      };
+
+      document.querySelectorAll('.example-btn').forEach(btn => {
+        btn.onclick = () => {
+          const box = $(btn.dataset.example);
+          box.hidden = !box.hidden;
+          btn.setAttribute('aria-expanded', String(!box.hidden));
+          btn.textContent = box.hidden ? '💡 예시 보기' : '🙈 예시 숨기기';
+        };
+      });
+
+      $('modal-go-results').onclick = () => {
+        $('submit-modal').hidden = true;
+        renderResults();
+        show('results');
+      };
+      $('modal-stay').onclick = () => { $('submit-modal').hidden = true; $('view-results-after-submit').focus(); };
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !$('submit-modal').hidden) $('modal-stay').click();
+      });
+    });
+  </script>
+ </body>
+</html>
